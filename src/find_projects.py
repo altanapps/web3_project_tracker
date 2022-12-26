@@ -20,6 +20,7 @@ class Project:
 
 
 def write(project_links):
+    # Write the results to a text file for now
     with open('data/project_links.txt', 'w') as f:
         for file in project_links:
             f.write(file + "\n")
@@ -33,7 +34,7 @@ def save_results(driver):
     project_links = [link.get_attribute('href') for link in project_links]
     print(len(project_links))
 
-    # Write all these projects into a textfile
+    # Write all these projects into a text file
     write(project_links)
 
 
@@ -57,8 +58,10 @@ def find_all_projects():
             loaded += NUM_ARTICLES
         except NoSuchElementException:
             save_results(driver)
+            break
         except:
             continue
+
     save_results(driver)
 
 
