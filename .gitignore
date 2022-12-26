@@ -1,0 +1,8 @@
+#ignore all within data folder
+data/
+
+#ignore .pyc files
+*.pyc
+
+#ignore all cache files
+__pycache__/
