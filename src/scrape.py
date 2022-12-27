@@ -1,6 +1,13 @@
 from bs4 import BeautifulSoup
 from lxml import etree
 import requests
+from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from datetime import datetime
+
+
+CHROME_DRIVER_PATH = '/Users/altantutar/Desktop/chromedriver'
 
 HEADERS = ({'User-Agent':
             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
@@ -11,16 +18,33 @@ STARS_XPATH = '//*[@id="repo-stars-counter-star"]'
 FORKS_XPATH = '//*[@id="repo-network-counter"]'
 WATCH_XPATH = '//*[@id="repo-content-pjax-container"]/div/div/div[3]/div[2]/div/div[1]/div/div[6]/a/strong'
 
+COMMITS_XPATH = '//*[@id="repo-content-pjax-container"]/div/div/div[3]/div[1]\
+    /div[2]/div[1]/div/div[4]/ul/li/a/span/strong'
 
-# RELEASES_XPATH = '//*[@id="repo-content-pjax-container"]/div/div/div[3]\
-#   /div[2]/div/div[2]/div/h2/a/span'
-# CONTRIBUTORS_XPATH = '//*[@id="repo-content-pjax-container"]/div/div/\
-#   div[3]/div[2]/div/div[4]/div/h2/a/span'
-# USERS_XPATH = '//*[@id="repo-content-pjax-container"]/div/div/\
-#   div[3]/div[2]/div/div[3]/div/h2/a/span'
-# COMMITS_XPATH = '//*[@id="repo-content-pjax-container"]/div/div/div[3]/div[1]/\
-#     div[2]/div[1]/div/div[4]/ul/li/a/span/strong'
-# TITLE_XPATH = '//*[@id="readme"]/div[2]/article/h1'
+TITLE_XPATH = '//*[@id="repository-container-header"]/div[1]/\
+    div/div/strong/a'
+
+
+class Project:
+    def __init__(self, title, url, num_stars, num_forks, num_watches,
+                 num_contributors, num_releases, num_users, num_commits, time_stamp):
+        self.title = title
+        self.url = url
+        self.num_stars = num_stars
+        self.num_forks = num_forks
+        self.num_watches = num_watches
+        self.num_contributors = num_contributors
+        self.num_releases = num_releases
+        self.num_users = num_users
+        self.num_commits = num_commits
+        self.time_stamp = time_stamp
+
+    def __str__(self):
+        return self.title + ", " + self.url + ", " + str(self.num_stars) + ", " + \
+            str(self.num_forks) + ", " + str(self.num_watches) + ", " + \
+            str(self.num_contributors) + ", " + str(self.num_releases) + ", " + \
+            str(self.num_users) + ", " + str(self.num_commits) + \
+            ", " + str(self.time_stamp)
 
 
 def convert_to_number(raw_text):
@@ -78,6 +102,7 @@ def get_other_data(soup):
             except:
                 continue
 
+    # TODO: Make a function out of this repetitive code
     if raw_contributors is not None:
         contributors = convert_to_number(raw_contributors)
     else:
@@ -102,7 +127,21 @@ def get_links(PATH="data/project_links.txt"):
     return f.readlines()
 
 
-def scrape_page(url):
+def get_commits(dom):
+    # Finds how many times the project was committed
+    try:
+        raw_text = dom.xpath(COMMITS_XPATH)[0].text
+        return convert_to_number(raw_text)
+    except:
+        return None
+
+
+def get_title(dom):
+    raw_text = dom.xpath(TITLE_XPATH)[0].text
+    return raw_text
+
+
+def scrape_page(url, dt):
     # Scrapes a given Github url for the desired statistics
     webpage = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(webpage.content, "html.parser")
@@ -112,39 +151,22 @@ def scrape_page(url):
     stars = get_stars(dom)
     forks = get_forks(dom)
     watches = get_watches(soup)
+    commits = get_commits(dom)
+    title = get_title(dom)
 
     contributors, releases, users = get_other_data(soup)
-    # commits = get_number_commits(dom)
 
-    return(stars, forks, watches, contributors, releases, users)
+    project = Project(title, url, stars, forks,
+                      watches, contributors, releases, users, commits, dt)
+    print(project)
+    return project
 
 
 def main():
+    dt = int(datetime.now().timestamp())
     links = [link.strip("\n") for link in get_links()]
     for link in links:
-        print(link)
-        print(scrape_page(link))
+        scrape_page(link, dt)
 
 
 main()
-
-
-# def get_number_contributors(dom):
-#     # Finds how many contributors does the project have
-#     raw_text = dom.xpath(CONTRIBUTORS_XPATH)[0].text
-#     return convert_to_number(raw_text)
-
-# def get_number_releases(dom):
-#     # Finds how many times the project had releases
-#     raw_text = dom.xpath(RELEASES_XPATH)[0].text
-#     return convert_to_number(raw_text)
-
-# def get_number_used_by(dom):
-#     # Finds how many people are using the project
-#     raw_text = dom.xpath(USERS_XPATH)[0].text
-#     return convert_to_number(raw_text)
-
-# def get_number_commits(dom):
-#     # Finds how many times code was committed to the project
-#     raw_text = dom.xpath(COMMITS_XPATH)[0].text
-#     return convert_to_number(raw_text)
