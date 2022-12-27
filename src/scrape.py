@@ -52,28 +52,48 @@ def get_forks(dom):
     return convert_to_number(raw_text)
 
 
-# def get_number_releases(dom):
-#     # Finds how many times the project had releases
-#     raw_text = dom.xpath(RELEASES_XPATH)[0].text
-#     return convert_to_number(raw_text)
+def get_other_data(soup):
+    # Returns the cleaned data for contributors, releases, and users
+    elements = soup.find_all("div", class_="BorderGrid-row")
+    raw_users, raw_contributors, raw_releases = None, None, None
+    for element in elements:
+        header = element.find("h2", class_="h4 mb-3")
+        if header is None:
+            continue
+        else:
+            # Find the title
+            try:
+                title_raw = header.find("a").text.strip("\n")
+                lst = title_raw.split()
+                if len(lst) == 3:
+                    # That must be the user number
+                    raw_users = lst[-1]
+                else:
+                    if lst[0] == "Releases" and len(lst) == 2:
+                        # This is the releases
+                        raw_releases = lst[-1]
+                    elif lst[0] == "Contributors" and len(lst) == 2:
+                        # This is the contributors
+                        raw_contributors = lst[-1]
+            except:
+                continue
 
+    if raw_contributors is not None:
+        contributors = convert_to_number(raw_contributors)
+    else:
+        contributors = None
 
-# def get_number_contributors(dom):
-#     # Finds how many contributors does the project have
-#     raw_text = dom.xpath(CONTRIBUTORS_XPATH)[0].text
-#     return convert_to_number(raw_text)
+    if raw_releases is not None:
+        releases = convert_to_number(raw_releases)
+    else:
+        releases = None
 
+    if raw_users is not None:
+        users = convert_to_number(raw_users)
+    else:
+        users = None
 
-# def get_number_used_by(dom):
-#     # Finds how many people are using the project
-#     raw_text = dom.xpath(USERS_XPATH)[0].text
-#     return convert_to_number(raw_text)
-
-
-# def get_number_commits(dom):
-#     # Finds how many times code was committed to the project
-#     raw_text = dom.xpath(COMMITS_XPATH)[0].text
-#     return convert_to_number(raw_text)
+    return contributors, releases, users
 
 
 def get_links(PATH="data/project_links.txt"):
@@ -93,12 +113,10 @@ def scrape_page(url):
     forks = get_forks(dom)
     watches = get_watches(soup)
 
-    # releases = get_number_releases(dom)
-    # contributors = get_number_contributors(dom)
-    # users = get_number_used_by(dom)
+    contributors, releases, users = get_other_data(soup)
     # commits = get_number_commits(dom)
 
-    return(stars, forks, watches)
+    return(stars, forks, watches, contributors, releases, users)
 
 
 def main():
@@ -109,3 +127,24 @@ def main():
 
 
 main()
+
+
+# def get_number_contributors(dom):
+#     # Finds how many contributors does the project have
+#     raw_text = dom.xpath(CONTRIBUTORS_XPATH)[0].text
+#     return convert_to_number(raw_text)
+
+# def get_number_releases(dom):
+#     # Finds how many times the project had releases
+#     raw_text = dom.xpath(RELEASES_XPATH)[0].text
+#     return convert_to_number(raw_text)
+
+# def get_number_used_by(dom):
+#     # Finds how many people are using the project
+#     raw_text = dom.xpath(USERS_XPATH)[0].text
+#     return convert_to_number(raw_text)
+
+# def get_number_commits(dom):
+#     # Finds how many times code was committed to the project
+#     raw_text = dom.xpath(COMMITS_XPATH)[0].text
+#     return convert_to_number(raw_text)
