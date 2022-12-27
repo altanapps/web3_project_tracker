@@ -11,14 +11,6 @@ NUM_ARTICLES = 20
 SLEEP_SECONDS = 1
 
 
-class Project:
-    def __init__(self, time_stamp, url, stars):
-        # Amend and change as you add more data
-        self.time_stamp = time_stamp
-        self.url = url
-        self.stars = stars
-
-
 def write(project_links):
     # Write the results to a text file for now
     with open('data/project_links.txt', 'w') as f:
@@ -49,6 +41,7 @@ def find_all_projects():
     driver = Chrome(executable_path=CHROME_DRIVER_PATH,
                     options=browser_options)
     driver.get(HOMEPAGE)
+    
     loaded = NUM_ARTICLES
     while True:
         try:

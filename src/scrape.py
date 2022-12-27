@@ -5,7 +5,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
-
+import hashlib
 
 CHROME_DRIVER_PATH = '/Users/altantutar/Desktop/chromedriver'
 
@@ -26,8 +26,9 @@ TITLE_XPATH = '//*[@id="repository-container-header"]/div[1]/\
 
 
 class Project:
-    def __init__(self, title, url, num_stars, num_forks, num_watches,
+    def __init__(self, id, title, url, num_stars, num_forks, num_watches,
                  num_contributors, num_releases, num_users, num_commits, time_stamp):
+        self.id = id
         self.title = title
         self.url = url
         self.num_stars = num_stars
@@ -40,7 +41,7 @@ class Project:
         self.time_stamp = time_stamp
 
     def __str__(self):
-        return self.title + ", " + self.url + ", " + str(self.num_stars) + ", " + \
+        return self.id + ", " + self.title + ", " + self.url + ", " + str(self.num_stars) + ", " + \
             str(self.num_forks) + ", " + str(self.num_watches) + ", " + \
             str(self.num_contributors) + ", " + str(self.num_releases) + ", " + \
             str(self.num_users) + ", " + str(self.num_commits) + \
@@ -137,8 +138,14 @@ def get_commits(dom):
 
 
 def get_title(dom):
+    # Finds the title of a given project
     raw_text = dom.xpath(TITLE_XPATH)[0].text
     return raw_text
+
+
+def generate_id(url):
+    # Returns a unique ID
+    return str(hash(url))[1:13]
 
 
 def scrape_page(url, dt):
@@ -156,7 +163,9 @@ def scrape_page(url, dt):
 
     contributors, releases, users = get_other_data(soup)
 
-    project = Project(title, url, stars, forks,
+    id = generate_id(url)
+
+    project = Project(id, title, url, stars, forks,
                       watches, contributors, releases, users, commits, dt)
     print(project)
     return project
