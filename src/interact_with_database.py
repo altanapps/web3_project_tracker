@@ -39,7 +39,7 @@ def return_all(conn):
     return cur.fetchall()
 
 
-conn = connect_to_db()
+# conn = connect_to_db()
 # entry = (810315203877, "go-ethereum", "https:// github.com/ethereum/go-ethereum",
 #          40600, 15600, 15600, 862, 165, 9400, 13848, 1672226002)
 # write_to_db(conn, entry)

@@ -2,8 +2,9 @@ import time
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+import os
 
-CHROME_DRIVER_PATH = '/Users/altantutar/Desktop/chromedriver'
+CHROME_DRIVER_PATH = os.getcwd() + '/chromedriver'
 HOMEPAGE = "https://github.com/topics/blockchain"
 LOAD_MORE = "/html/body/div[1]/div[4]/main/div[2]/div[2]/div/div[1]/form/button"
 ARTICLES = "/html/body/div[1]/div[5]/main/div[2]/div[2]/div/div[1]/article[1]"
@@ -41,7 +42,7 @@ def find_all_projects():
     driver = Chrome(executable_path=CHROME_DRIVER_PATH,
                     options=browser_options)
     driver.get(HOMEPAGE)
-    
+
     loaded = NUM_ARTICLES
     while True:
         try:
@@ -56,6 +57,3 @@ def find_all_projects():
             continue
 
     save_results(driver)
-
-
-find_all_projects()

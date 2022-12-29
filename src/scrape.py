@@ -5,9 +5,10 @@ from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime
-import hashlib
+import os
 
-CHROME_DRIVER_PATH = '/Users/altantutar/Desktop/chromedriver'
+CHROME_DRIVER_PATH = os.getcwd() + '/chromedriver'
+
 
 HEADERS = ({'User-Agent':
             'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
@@ -46,6 +47,13 @@ class Project:
             str(self.num_contributors) + ", " + str(self.num_releases) + ", " + \
             str(self.num_users) + ", " + str(self.num_commits) + \
             ", " + str(self.time_stamp)
+
+    def return_obj(self):
+        # Return the object so you could write into
+        return (self.id, self.title, self.url,
+                self.num_stars, self.num_forks, self.num_watches,
+                self.num_contributors, self.num_releases, self.num_users,
+                self.num_commits, self.time_stamp)
 
 
 def convert_to_number(raw_text):
@@ -167,7 +175,6 @@ def scrape_page(url, dt):
 
     project = Project(id, title, url, stars, forks,
                       watches, contributors, releases, users, commits, dt)
-    print(project)
     return project
 
 
@@ -176,6 +183,3 @@ def main():
     links = [link.strip("\n") for link in get_links()]
     for link in links:
         scrape_page(link, dt)
-
-
-main()
